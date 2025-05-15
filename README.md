@@ -12,35 +12,43 @@ A Spring Boot microservice for validating MSISDN (phone number) formats with cou
 ```bash
 git clone https://github.com/your-repo/msisdn-format-checker.git
 cd msisdn-format-checker
-
-##build the project
+```
+2. Build the project
+```bash
 mvn clean package
-##run the project
+```
+3. Run the project
+```bash
 mvn spring-boot:run
+```
 
 ##Prodcution-mode
+```bash
 java -jar target/msisdn-format-checker-0.0.1-SNAPSHOT.jar
-
+```
 ###Other deployment Options
 - Docker
+```
 docker build -t msisdn-validator .
 docker run -p 8080:8080 msisdn-validator
+```
 - Systemd Service (Linux)
+```
 [Unit]
 Description=MSISDN Validator Service
 After=syslog.target
-
 [Service]
 User=appuser
 ExecStart=/usr/bin/java -jar /opt/msisdn-validator/msisdn-format-checker-0.0.1-SNAPSHOT.jar
 SuccessExitStatus=143
-
 [Install]
 WantedBy=multi-user.target
-
-enable and start service:
+```
+Enable and start service:
+```
 sudo systemctl enable msisdn-validator
 sudo systemctl start msisdn-validator
+```
 
 ## API Documentation
 After starting the service, access Swagger UI at: http://localhost:8080/swagger-ui.html

@@ -2,3 +2,14 @@ target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst
 /target/maven-status/maven-compiler-plugin
 /target/classes
 /target/classes
+.idea/compiler.xml
+.idea/encodings.xml
+.idea/jarRepositories.xml
+.idea/misc.xml
+.idea/vcs.xml
+target/classes/com/example/msisdnformatchecker/controller/MsisdnValidationController$MsisdnRequest.class
+target/classes/com/example/msisdnformatchecker/controller/MsisdnValidationController$ValidationResponse.class
+target/classes/com/example/msisdnformatchecker/controller/MsisdnValidationController.class
+target/classes/com/example/msisdnformatchecker/MsisdnFormatCheckerApplication.class
+target/maven-archiver/pom.properties
+target/msisdn-format-checker-0.0.1-SNAPSHOT.jar.original

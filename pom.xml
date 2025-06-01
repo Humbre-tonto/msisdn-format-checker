@@ -11,7 +11,7 @@
 
 	<groupId>com.example</groupId>
 	<artifactId>msisdn-format-checker</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.1-SNAPSHOT</version>
 	<name>msisdn-format-checker</name>
 	<description>MSISDN Format Checker Microservice</description>
 

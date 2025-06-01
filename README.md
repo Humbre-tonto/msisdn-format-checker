@@ -14,6 +14,7 @@ A small microservice that leverages the [Google libphonenumber library](https://
 
 ## **Table of Contents**
 - [Installation](#installation)
+- [Run pre-built package](#Run-pre-built-package)
 - [Usage](#usage)
 - [API Endpoints](#api-endpoints)
 - [Development](#development)
@@ -46,6 +47,14 @@ A small microservice that leverages the [Google libphonenumber library](https://
     mvn spring-boot:run
    ```
 
+---
+## **Run pre-built package**
+
+### **Prerequisites**
+- Java (version 21).
+- download the latest release from the Releases tab
+- change the port of the application.properties (default 8080)
+- run the Jar
 ---
 
 ## **Usage**

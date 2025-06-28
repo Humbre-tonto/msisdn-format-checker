@@ -3,6 +3,8 @@ package com.example.msisdnformatchecker.controller;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -15,6 +17,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RequestMapping("/api/msisdn")
 @Tag(name = "MSISDN Validation", description = "API for validating MSISDN numbers")
 public class MsisdnValidationController {
+    private static final Logger logger = LoggerFactory.getLogger(MsisdnValidationController.class);
 
     @Operation(summary = "Validate MSISDN number", description = "Checks if the provided MSISDN number is valid for the specified country")
     @ApiResponses(value = {
@@ -24,12 +27,16 @@ public class MsisdnValidationController {
     @PostMapping("/validate")
     public ValidationResponse validateMsisdn(@RequestBody MsisdnRequest request) {
         PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
+         //log the incoming requestbody
+        logger.info("Received MSISDN validation request: {} for country: {}", request.getMsisdn(), request.getCountryCode());
         try {
             Phonenumber.PhoneNumber phoneNumber = phoneUtil.parse(request.getMsisdn(), request.getCountryCode());
             boolean isValid = phoneUtil.isValidNumberForRegion(phoneNumber, request.getCountryCode());
-            return new ValidationResponse(isValid, 
-                isValid ? "Valid MSISDN format for country " + request.getCountryCode() 
+            ValidationResponse response = new ValidationResponse(isValid,
+                isValid ? "Valid MSISDN format for country " + request.getCountryCode()
                         : "Invalid MSISDN format for country " + request.getCountryCode());
+            // Log the validation result
+            logger.info("Validation result: {} - {}", response.isValid(), response.getMessage());            return response;
         } catch (NumberParseException e) {
             return new ValidationResponse(false, "Invalid MSISDN format: " + e.getMessage());
         }

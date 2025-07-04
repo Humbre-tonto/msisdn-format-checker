@@ -30,13 +30,21 @@ public class MsisdnValidationController {
          //log the incoming requestbody
         logger.info("Received MSISDN validation request: {} for country: {}", request.getMsisdn(), request.getCountryCode());
         try {
+            String msisdn = request.getMsisdn();
+            //if the msisdn contains + value remove it from the msisdn
+            if (msisdn.startsWith("+")) {
+                msisdn = msisdn.substring(1);
+                request.setMsisdn(msisdn);
+                logger.info("MSISDN after removing +: {}", msisdn);
+            }
             Phonenumber.PhoneNumber phoneNumber = phoneUtil.parse(request.getMsisdn(), request.getCountryCode());
             boolean isValid = phoneUtil.isValidNumberForRegion(phoneNumber, request.getCountryCode());
             ValidationResponse response = new ValidationResponse(isValid,
                 isValid ? "Valid MSISDN format for country " + request.getCountryCode()
                         : "Invalid MSISDN format for country " + request.getCountryCode());
             // Log the validation result
-            logger.info("Validation result: {} - {}", response.isValid(), response.getMessage());            return response;
+            logger.info("Validation result: {} - {}", response.isValid(), response.getMessage());
+            return response;
         } catch (NumberParseException e) {
             return new ValidationResponse(false, "Invalid MSISDN format: " + e.getMessage());
         }

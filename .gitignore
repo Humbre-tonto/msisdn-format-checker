@@ -13,3 +13,6 @@ target/classes/com/example/msisdnformatchecker/controller/MsisdnValidationContro
 target/classes/com/example/msisdnformatchecker/MsisdnFormatCheckerApplication.class
 target/maven-archiver/pom.properties
 target/msisdn-format-checker-0.0.1-SNAPSHOT.jar.original
+target/classes/com/example/msisdnformatchecker/controller/MsisdnValidationController$MsisdnRequest.class
+target/classes/com/example/msisdnformatchecker/controller/MsisdnValidationController$MsisdnRequest.class
+*.class

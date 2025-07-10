@@ -39,17 +39,36 @@ public class MsisdnValidationController {
             }
             Phonenumber.PhoneNumber phoneNumber = phoneUtil.parse(request.getMsisdn(), request.getCountryCode());
             boolean isValid = phoneUtil.isValidNumberForRegion(phoneNumber, request.getCountryCode());
-            ValidationResponse response = new ValidationResponse(isValid,
-                isValid ? "Valid MSISDN format for country " + request.getCountryCode()
-                        : "Invalid MSISDN format for country " + request.getCountryCode());
-            // Log the validation result
-            logger.info("Validation result: {} - {}", response.isValid(), response.getMessage());
-            return response;
+            if (isValid) {
+                ValidationResponse response = new ValidationResponse(true,
+                    "Valid MSISDN format for country " + request.getCountryCode());
+                logger.info("Validation result: {} - {}", response.isValid(), response.getMessage());
+                return response;
+            } else {
+                // MSISDN is not valid for given country code, so format it as international number
+                try {
+                    Phonenumber.PhoneNumber parsedMsisdn;
+                    if (!msisdn.startsWith("+")) {
+                        parsedMsisdn = phoneUtil.parse("+" + msisdn, null);
+                    } else {
+                        parsedMsisdn = phoneUtil.parse(msisdn, null);
+                    }
+                    boolean isInternationalValid = phoneUtil.isValidNumber(parsedMsisdn);
+                    PhoneNumberUtil.PhoneNumberType numberType = phoneUtil.getNumberType(parsedMsisdn);
+                    if (isInternationalValid && numberType == PhoneNumberUtil.PhoneNumberType.MOBILE) {
+                        String formattedMsisdn = phoneUtil.format(parsedMsisdn, PhoneNumberUtil.PhoneNumberFormat.E164);
+                        return new ValidationResponse(true, "Formatted as international mobile: " + formattedMsisdn);
+                    } else {
+                        return new ValidationResponse(false, "Number is not a valid mobile number internationally.");
+                    }
+                } catch (NumberParseException ex) {
+                    return new ValidationResponse(false, "Could not parse as international number: " + ex.getMessage());
+                }
+            }
         } catch (NumberParseException e) {
             return new ValidationResponse(false, "Invalid MSISDN format: " + e.getMessage());
         }
     }
-
     static class MsisdnRequest {
         private String msisdn;
         private String countryCode;

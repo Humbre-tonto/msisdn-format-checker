@@ -1,6 +1,5 @@
 # This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
-# It also updates the libphonenumber dependency to its latest version before building
-# and uploads the resulting JAR file as a workflow artifact.
+# It uploads the resulting JAR file as a workflow artifact.
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven
 
 # This workflow uses actions that are not certified by GitHub.
@@ -8,18 +7,17 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Java CI with Maven (Auto-Update Libphonenumber & Upload JAR)
+name: Java CI with Maven (Build & Upload JAR) # Updated name for clarity
 
 on:
   push:
-    branches: [ "main", "master" ] # Added 'master' as a common alternative for the main branch
+    branches: [ "main", "master" ]
   pull_request:
-    branches: [ "main", "master" ] # Added 'master'
+    branches: [ "main", "master" ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -31,42 +29,14 @@ jobs:
         distribution: 'temurin'
         cache: maven
 
-    - name: Get latest Google libphonenumber version
-      id: get-libphonenumber-version
-      run: |
-        # Use Maven Help Plugin to evaluate the latest version from Maven Central
-        # This command queries Maven Central for the latest release version of the artifact
-        LATEST_VERSION=$(mvn help:evaluate -Dexpression="org.apache.maven.artifact.resolver.ArtifactResolver/resolve(new org.apache.maven.artifact.DefaultArtifact('com.googlecode.libphonenumber', 'libphonenumber', '', 'jar', 'LATEST'), @project.remotePluginRepositories, @project.remoteProjectRepositories)" -q -DforceStdout | grep -oP '(?<=:libphonenumber:)\d+\.\d+\.\d+' || true)
-
-        if [ -z "$LATEST_VERSION" ]; then
-          echo "Warning: Could not determine the latest libphonenumber version. Proceeding with current POM version."
-          # Fallback to current version if API call fails or no version found
-          CURRENT_VERSION=$(mvn help:evaluate -Dexpression="project.dependencies[?artifactId=='libphonenumber'].version" -q -DforceStdout || echo "Unknown")
-          echo "Current libphonenumber version in POM: $CURRENT_VERSION"
-          echo "LIBPHONENUMBER_VERSION=$CURRENT_VERSION" >> "$GITHUB_OUTPUT"
-        else
-          echo "Latest libphonenumber version found: $LATEST_VERSION"
-          echo "LIBPHONENUMBER_VERSION=$LATEST_VERSION" >> "$GITHUB_OUTPUT"
-        fi
-      shell: bash
-
-    - name: Update libphonenumber version in pom.xml
-      if: steps.get-libphonenumber-version.outputs.LIBPHONENUMBER_VERSION != ''
-      run: |
-        NEW_VERSION="${{ steps.get-libphonenumber-version.outputs.LIBPHONENUMBER_VERSION }}"
-        echo "Updating libphonenumber to version: $NEW_VERSION"
-        mvn versions:set-dependency -DgroupId=com.googlecode.libphonenumber -DartifactId=libphonenumber -DnewVersion=$NEW_VERSION -DgenerateBackupPoms=false
-        cat pom.xml # Display the modified pom.xml for verification
-      shell: bash
-
-    - name: Build with Maven
+    - name: Build with Maven # This step will now directly use the version from your pom.xml
       run: mvn -B package --file pom.xml
 
     - name: Upload Maven Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: msisdn-format-checker-jar # Name your artifact
-        path: target/*.jar # Path to the JAR file(s)
+        name: msisdn-format-checker-jar
+        path: target/*.jar
 
     # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
     # - name: Update dependency graph

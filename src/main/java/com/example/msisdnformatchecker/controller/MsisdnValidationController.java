@@ -48,22 +48,18 @@ public class MsisdnValidationController {
             } else {
                 // MSISDN is not valid for given country code, so format it as international number
                 try {
-                    Phonenumber.PhoneNumber parsedMsisdn;
-                    if (!msisdn.startsWith("+")) {
-                        parsedMsisdn = phoneUtil.parse("+" + msisdn, null);
-                    } else {
-                        parsedMsisdn = phoneUtil.parse(msisdn, null);
+                    ValidationResponse international = validateInternational(phoneUtil, msisdn);
+                    if (international.isValid()) {
+                        return international;
                     }
-                    boolean isInternationalValid = phoneUtil.isValidNumber(parsedMsisdn);
-                    PhoneNumberUtil.PhoneNumberType numberType = phoneUtil.getNumberType(parsedMsisdn);
-
-                    if (isInternationalValid && isAvailableNumberType(numberType)) {
-                        logger.info("Validation International number result: {} - with numberType: {}", isInternationalValid, numberType);
-                        return new ValidationResponse(true, "Formatted as international mobile: "+parsedMsisdn);
-                    } else {
-                        logger.info("Validation International number result: {} - with numberType: {}", isInternationalValid, numberType);
-                        return new ValidationResponse(false, "Number is not a valid mobile number internationally.");
+                    // ponytail: retry once without a leading 234/+234 gateway prefix
+                    String stripped = msisdn.startsWith("+234") ? msisdn.substring(4)
+                            : msisdn.startsWith("234") ? msisdn.substring(3) : null;
+                    if (stripped != null) {
+                        logger.info("Retrying international validation without 234 prefix: {}", stripped);
+                        return validateInternational(phoneUtil, stripped);
                     }
+                    return international;
                 } catch (NumberParseException ex) {
                     return new ValidationResponse(false, "Could not parse as international number: " + ex.getMessage());
                 }
@@ -71,6 +67,18 @@ public class MsisdnValidationController {
         } catch (NumberParseException e) {
             return new ValidationResponse(false, "Invalid MSISDN format: " + e.getMessage());
         }
+    }
+
+    private ValidationResponse validateInternational(PhoneNumberUtil phoneUtil, String msisdn) throws NumberParseException {
+        Phonenumber.PhoneNumber parsedMsisdn = phoneUtil.parse(msisdn.startsWith("+") ? msisdn : "+" + msisdn, null);
+        boolean isInternationalValid = phoneUtil.isValidNumber(parsedMsisdn);
+        PhoneNumberUtil.PhoneNumberType numberType = phoneUtil.getNumberType(parsedMsisdn);
+        logger.info("Validation International number result: {} - with numberType: {}", isInternationalValid, numberType);
+
+        if (isInternationalValid && isAvailableNumberType(numberType)) {
+            return new ValidationResponse(true, "Formatted as international mobile: " + parsedMsisdn);
+        }
+        return new ValidationResponse(false, "Number is not a valid mobile number internationally.");
     }
 
     private boolean isAvailableNumberType(PhoneNumberUtil.PhoneNumberType numberType) {

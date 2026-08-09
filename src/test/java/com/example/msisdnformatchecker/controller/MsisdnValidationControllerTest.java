@@ -54,6 +54,18 @@ public class MsisdnValidationControllerTest {
     }
 
     @Test
+    public void testValidateMsisdn_strips234PrefixAndRevalidates() {
+        MsisdnValidationController.MsisdnRequest request = new MsisdnValidationController.MsisdnRequest();
+        request.setMsisdn("234201094056913");
+        request.setCountryCode("NG");
+
+        MsisdnValidationController.ValidationResponse response = msisdnValidationController.validateMsisdn(request);
+
+        assertNotNull(response);
+        assertEquals(true, response.isValid());
+    }
+
+    @Test
     public void testValidateMsisdn_internationalNumber() {
         MsisdnValidationController.MsisdnRequest request = new MsisdnValidationController.MsisdnRequest();
         request.setMsisdn("+442079460837");
